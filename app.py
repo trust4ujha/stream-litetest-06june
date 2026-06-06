@@ -40,7 +40,7 @@ if user_query := st.chat_input('Message the AI....'):
         llm = ChatGroq(
             temperature = 0.7,
             model_name = 'llama-3.3-70b-versatile',
-            api_key = user_api_key
+            api_key = groq_api
         )
 
         # Call the Actual AI
