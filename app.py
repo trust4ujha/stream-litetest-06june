@@ -1,37 +1,58 @@
 import streamlit as st
+from langchain_groq import ChatGroq
 
-st.set_page_config(page_title="Calculator Builder", layout="wide")
-# App Title
-st.title("🧮 Agentic Calculator")
+st.set_page_config(page_title='My AI Chat', layout='centered')
 
-# Create two columns
-col1, col2 = st.columns(2)
+st.title("🤖 The Groq Chatbot")
+st.write('A fully integrated, memory enabled AI Assistant')
 
-with col1:
-    num1 = st.number_input("First Number", value=0.0)
+# 1. Sidebar
+with st.sidebar:
+    st.header('⚙️ Configuration')
+    user_api_key = st.text_input('Enter your Groq api key:', type='password')
+    st.info('Your key is required to wake up the AI brain')
 
-with col2:
-    num2 = st.number_input("Second Number", value=0.0)
 
-# Operation selection
-operation = st.selectbox(
-    "Operation",
-    ["Add", "Subtract", "Multiply", "Divide"]
-)
+# 2. Memory vault
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
-# Calculate button
-if st.button("Calculate"):
-    if operation == "Add":
-        result = num1 + num2
-    elif operation == "Subtract":
-        result = num1 - num2
-    elif operation == "Multiply":
-        result = num1 * num2
-    elif operation == "Divide":
-        if num2 == 0:
-            st.error("Cannot divide by zero!")
-        else:
-            result = num1 / num2
+# 3. Display History
+# Redraw all past messages every time the page reruns
+for msg in st.session_state.messages:
+    with st.chat_message(msg['role']): # This display human and ai message differently
+        st.markdown(msg['content'])
 
-    if not (operation == "Divide" and num2 == 0):
-        st.success(f"Result: {result}")
+# 3. The input box(pinned to the bottom)
+if user_query := st.chat_input('Message the AI....'):
+
+    if not user_api_key:
+        st.error('Please enter API Key in the sidebar first')
+
+    else:
+    # Display the user message instantly
+        with st.chat_message('user'):
+            st.markdown(user_query)
+
+        # Save the user message to the vault
+        st.session_state.messages.append({"role":"user", "content": user_query})
+
+        llm = ChatGroq(
+            temperature = 0.7,
+            model_name = 'llama-3.3-70b-versatile',
+            api_key = user_api_key
+        )
+
+        # Call the Actual AI
+
+        with st.spinner('AI is thinking....'):
+            response = llm.invoke(st.session_state.messages)
+            bot_answer = response.content
+
+
+        # Display the bot message instantly
+        with st.chat_message('assistant'):
+            st.markdown(bot_answer)
+
+        # Save the user message to the vault
+        st.session_state.messages.append({"role":"assistant", "content": bot_answer})
