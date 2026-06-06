@@ -2,7 +2,7 @@ import streamlit as st
 from langchain_groq import ChatGroq
 
 st.set_page_config(page_title='My AI Chat', layout='centered')
-
+groq_api = st.secrets["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"]
 st.title("🤖 The Groq Chatbot")
 st.write('A fully integrated, memory enabled AI Assistant')
 
